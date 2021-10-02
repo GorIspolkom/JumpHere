@@ -2,12 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Assets.Scripts.Entities
+namespace Assets.Scripts.Players
 {
     public abstract class State
     {
-        protected Entity _entity;
-        public void SetContext(Entity entity) => _entity = entity;
+        protected Player _player;
+        protected State(Player player) => _player = player;
         public abstract void Action();
     }
 }
