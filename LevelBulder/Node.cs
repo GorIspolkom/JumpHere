@@ -7,18 +7,17 @@ namespace Assets.Scripts.Level
     public class Node : MonoBehaviour
     {
         [SerializeField]
-        private GameObject _panel;
+        public Vector3 pos { get; private set; }
         [SerializeField]
-        private Vector3 _pos;
+        public GameObject panel { get; private set; }
 
         public Node(GameObject panel, float weight, Vector3 pos)
         {
-            _panel = panel;
-            _pos = pos;
-            Vector3 scale = _panel.transform.localScale;
-            _panel.transform.localScale = new Vector3(weight, scale.y, scale.z);
-            Instantiate(_panel, _pos, Quaternion.identity);
+            this.pos = pos;
+            Vector3 scale = panel.transform.localScale;
+            this.panel = Instantiate(panel, pos, Quaternion.identity);
+            this.panel.transform.localScale = new Vector3(weight, scale.y, scale.z);
         }
+        public void DestroyNode() => Destroy(panel);
     }
-
 }
