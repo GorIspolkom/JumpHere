@@ -10,8 +10,8 @@ namespace Assets.Scripts.Level
         {
             if (other.tag == "Player")
             {
-                Debug.Log("Start track");
-                LevelBuilder.GetLevelBuilder().NewTrack();
+                Debug.Log(1);
+                StartCoroutine(LevelBuilder.GetLevelBuilder().NewTrack());
             }
         }
     }

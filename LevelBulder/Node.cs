@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.Level
 {
-    public class Node : MonoBehaviour
+    public class Node 
     {
         [SerializeField]
         public Vector3 pos { get; private set; }
@@ -15,9 +15,9 @@ namespace Assets.Scripts.Level
         {
             this.pos = pos;
             Vector3 scale = panel.transform.localScale;
-            this.panel = Instantiate(panel, pos, Quaternion.identity);
+            this.panel = UnityEngine.Object.Instantiate(panel, pos, Quaternion.identity);
             this.panel.transform.localScale = new Vector3(weight, scale.y, scale.z);
         }
-        public void DestroyNode() => Destroy(panel);
+        public void DestroyNode() => UnityEngine.Object.Destroy(panel);
     }
 }
