@@ -8,7 +8,7 @@ using UnityEngine;
 namespace HairyEngine.HairyCamera
 {
     [Serializable]
-    class TargetController
+    public class TargetController
     {
         [HideInInspector]
         public Vector3 prevCenter;
@@ -16,6 +16,7 @@ namespace HairyEngine.HairyCamera
         public Vector3 currentCenter;
         [HideInInspector]
         public Vector2 minSizes;
+        public Vector3 velocity => currentCenter - prevCenter;
         public bool IsMovement => prevCenter != currentCenter;
         private Func<Vector3, Vector3> Vector3D;
 

@@ -9,11 +9,11 @@ namespace HairyEngine.HairyCamera
 {
     public interface ICameraComponent
     {
-        int PriorityOrder { get; set; }
+        int PriorityOrder { get; }
     }
     public interface IPreMove : ICameraComponent
     {
-        void HandleStartMove(Vector3 direction);
+        void HandleStartMove(Vector3 position);
     }
     public interface IPositionChanged : ICameraComponent
     {

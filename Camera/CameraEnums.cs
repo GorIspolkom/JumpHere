@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace HairyEngine.HairyCamera
 {
-    enum MovementAxis
+    public enum MovementAxis
     {
         XY,
         XZ,

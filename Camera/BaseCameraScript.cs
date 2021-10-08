@@ -31,59 +31,17 @@ namespace HairyEngine.HairyCamera
 
         [SerializeField]
         private CameraHandler _mainCamera;
-        protected Transform _transform;
-
-        protected Func<Vector3, float> Vector3H;
-        protected Func<Vector3, float> Vector3V;
-        protected Func<Vector3, float> Vector3D;
-        protected Func<float, float, Vector3> VectorHV;
-        protected Func<float, float, float, Vector3> VectorHVD;
-
-        bool _enabled;
-
-        protected virtual void Awake()
-        {
-            _transform = transform;
-            //BaseCameraController.AddExtension(this);
-
-            if (enabled)
-                Enable();
-        }
 
         protected virtual void OnEnable()
         {
-            Enable();
         }
 
         protected virtual void OnDisable()
         {
-            Disable();
         }
 
-        protected virtual void OnDestroy()
-        {
-            Disable();
-        }
-
-        /// <summary>Called when the method Reset is called on the Core. Use it to reset an extension.</summary>
         public virtual void OnReset()
         {
-        }
-
-        void Enable()
-        {
-            if (!(_enabled || _mainCamera == null))
-            {
-                _enabled = true;
-            }
-        }
-
-        void Disable()
-        {
-            if (_mainCamera != null && _enabled)
-            {
-                _enabled = false;
-            }
         }
     }
 }

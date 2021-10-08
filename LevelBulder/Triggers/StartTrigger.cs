@@ -10,8 +10,10 @@ namespace Assets.Scripts.Level
         {
             if (other.tag == "Player")
             {
-                Debug.Log(1);
                 StartCoroutine(LevelBuilder.GetLevelBuilder().NewTrack());
+                Debug.Log("Data point " + Data._points);
+                UIManager.GetUIManager().SetText();
+                gameObject.GetComponent<StartTrigger>().enabled = false;
             }
         }
     }

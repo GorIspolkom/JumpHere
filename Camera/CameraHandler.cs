@@ -15,25 +15,29 @@ namespace HairyEngine.HairyCamera
         public bool FollowVertical = true;
         public float VerticalFollowSmoothness = 0.15f;
 
+        public bool FollowHigh = true;
+        public float HighFollowSmoothness = 0.15f;
+
         public float zoomFollowSmoothness = 0.15f;
 
         public Vector3? exclusiveTargetPosition;
 
         public Camera GameCamera => _gameCamera;
+        public TargetController Targets => targetController;
         public Transform CameraTransform => _transform;
-        public Vector3 WorldToLocalPlanty(Vector3 vector) => Vector3D(vector.x, vector.y, vector.z);
+        public Vector3 WorldToLocalPlanty(Vector3 vector) => IsometricVector3(Vector3D(vector.x, vector.y, vector.z));
+        public float PrevVelocity { get; private set; }
         public Vector3 CameraTargetPosition { get; private set; }
+        public Vector3 CameraPosition { get => _transform.position; }
         public float CameraTargetSize { get; private set; }
         public Vector2 ScreenSizeInWorldCoordinates { get; private set; }
         public bool IsMovement => _prevCameraPos != _transform.position;
+        public bool IsZoomOnTarget => Mathf.Abs(CameraTargetSize - ScreenSizeInWorldCoordinates.y) > 0.02f;
         public bool IsOutTarget {
             get
             {
                 Vector2 r = targetController.currentCenter - _transform.position;
-                Debug.Log(CameraTargetSize);
-                Debug.Log(ScreenSizeInWorldCoordinates.y);
-                return Vector2D(FollowHorizontal ? r.x : 0, FollowVertical ? r.y : 0).sqrMagnitude > 0.002f ||
-                    Mathf.Abs(CameraTargetSize - ScreenSizeInWorldCoordinates.y) > 0.015f;
+                return Vector2D(FollowHorizontal ? r.x : 0, FollowVertical ? r.y : 0).sqrMagnitude > 0.002f;
             }
         }
         public static CameraHandler Instance
@@ -55,6 +59,7 @@ namespace HairyEngine.HairyCamera
         public float OffsetX;
         [Range(-1f, 1f)]
         public float OffsetY;
+        public float hight;
 
         [SerializeField] TargetController targetController;
         [SerializeField] MovementAxis axis;
@@ -75,8 +80,8 @@ namespace HairyEngine.HairyCamera
         Func<float, float, float, Vector3> Vector3D;
         Func<Vector3, Vector3> IsometricVector3;
 
-        private Action<Vector3> onPreMoveAction;
-        private Action<Vector3> onPostMoveAction;
+        private List<IPreMove> preMoveAction;
+        private List<IPostMove> postMoveAction;
         private List<IDeltaPositionChanger> deltaPositionChangers;
         private List<IPositionChanged> positionChangers;
         private List<IViewSizeDeltaChange> deltaViewSizeChangers;
@@ -103,69 +108,23 @@ namespace HairyEngine.HairyCamera
             targetController.Update();
             if (isCenterOnTargetOnStart)
             {
-                _transform.position = Vector3D(targetController.currentCenter.x, targetController.currentCenter.y, 10);
+                _transform.position = Vector3D(targetController.currentCenter.x, targetController.currentCenter.y, hight);
             }
         }
 
         private void Update()
         {
             targetController.Update();
-            if (targetController.IsMovement || IsOutTarget)
-            {
+            //if (targetController.IsMovement || IsOutTarget)
                 Move();
-            }
+            Zoom();
         }
-        private void Move()
+        private void Zoom()
         {
-            _prevCameraPos = _transform.position;
-            Vector2 delta = targetController.currentCenter - _transform.position;
-
-            onPreMoveAction?.Invoke(targetController.currentCenter);
-
-            if (exclusiveTargetPosition.HasValue)
-            {
-                CameraTargetPosition = Vector2D(AxisX(exclusiveTargetPosition.Value) - AxisX(_transform.position), AxisY(exclusiveTargetPosition.Value) - AxisY(_transform.position));
-                exclusiveTargetPosition = null;
-            }
-            else
-            {
-                //Follow only on selected axis
-                var cameraTargetPositionX = FollowHorizontal ? AxisX(targetController.currentCenter) : AxisX(_transform.position);
-                var cameraTargetPositionY = FollowVertical ? AxisY(targetController.currentCenter) : AxisY(_transform.position);
-                CameraTargetPosition = Vector2D(cameraTargetPositionX, cameraTargetPositionY);
-                
-                //Calculate influences
-                foreach (Vector3 influnce in _influences)
-                    CameraTargetPosition += influnce;
-                _influences.Clear();
-            }
-            //Add offset
-            CameraTargetPosition += Vector2D(FollowHorizontal ? OffsetX : 0, FollowVertical ? OffsetY : 0);
-            CameraTargetPosition = IsometricVector3(CameraTargetPosition);
-
-            // Calculate the base delta movement
-            var horizontalDeltaMovement = Mathf.Lerp(AxisX(_transform.position), AxisX(CameraTargetPosition), HorizontalFollowSmoothness * Time.deltaTime);
-            var verticalDeltaMovement = Mathf.Lerp(AxisY(_transform.position), AxisY(CameraTargetPosition), VerticalFollowSmoothness * Time.deltaTime);
-
-            horizontalDeltaMovement -= AxisX(_transform.position);
-            verticalDeltaMovement -= AxisY(_transform.position);
-
-            var deltaPosition = Vector2D(horizontalDeltaMovement, verticalDeltaMovement);
-
-            foreach (IDeltaPositionChanger positionChanger in deltaPositionChangers)
-                deltaPosition = positionChanger.AdjustDelta(deltaPosition);
-
-            Vector3 newPosition = _transform.position + deltaPosition;
-            foreach (IPositionChanged positionChanger in positionChangers)
-                newPosition = positionChanger.HandlePositionChange(newPosition);
-
-            _transform.position = newPosition;
-
-
             // Cycle through the size delta changers
             CameraTargetSize = targetController.minSizes.y > targetController.minSizes.x ? targetController.minSizes.y : targetController.minSizes.x / GameCamera.aspect;
             var deltaSize = Mathf.Lerp(ScreenSizeInWorldCoordinates.y, CameraTargetSize, zoomFollowSmoothness * Time.deltaTime) - ScreenSizeInWorldCoordinates.y;
-            foreach(IViewSizeDeltaChange viewSizeDeltaChange in deltaViewSizeChangers)
+            foreach (IViewSizeDeltaChange viewSizeDeltaChange in deltaViewSizeChangers)
                 deltaSize = viewSizeDeltaChange.AdjustSize(deltaSize);
 
             // Calculate the new size
@@ -179,8 +138,61 @@ namespace HairyEngine.HairyCamera
             // Apply the new size
             if (newSize != ScreenSizeInWorldCoordinates.y)
                 SetScreenSize(newSize);
+        }
+        private void Move()
+        {
+            _prevCameraPos = _transform.position;
+            Vector2 delta = targetController.currentCenter - _transform.position;
 
-            onPostMoveAction?.Invoke(targetController.currentCenter);
+            foreach (IPreMove preMoveAction in preMoveAction)
+                preMoveAction.HandleStartMove(targetController.currentCenter);
+
+            if (exclusiveTargetPosition.HasValue)
+            {
+                exclusiveTargetPosition -= _transform.position;
+                CameraTargetPosition = Vector3D(AxisX(exclusiveTargetPosition.Value), AxisY(exclusiveTargetPosition.Value), AxisZ(exclusiveTargetPosition.Value));
+                exclusiveTargetPosition = null;
+            }
+            else
+            {
+                //Follow only on selected axis
+                var cameraTargetPositionX = FollowHorizontal ? AxisX(targetController.currentCenter) : AxisX(_transform.position);
+                var cameraTargetPositionY = FollowVertical ? AxisY(targetController.currentCenter) : AxisY(_transform.position);
+                var cameraTargetPositionZ = FollowHigh ? AxisZ(targetController.currentCenter) + hight : AxisZ(_transform.position);
+                CameraTargetPosition = Vector3D(cameraTargetPositionX, cameraTargetPositionY, cameraTargetPositionZ );
+                
+                //Calculate influences
+                foreach (Vector3 influnce in _influences)
+                    CameraTargetPosition += influnce;
+                _influences.Clear();
+            }
+            //Add offset
+            CameraTargetPosition += Vector2D(FollowHorizontal ? OffsetX : 0, FollowVertical ? OffsetY : 0);
+            CameraTargetPosition = IsometricVector3(CameraTargetPosition);
+
+            // Calculate the base delta movement
+            var horizontalDeltaMovement = Mathf.Lerp(AxisX(_transform.position), AxisX(CameraTargetPosition), HorizontalFollowSmoothness * Time.deltaTime);
+            var verticalDeltaMovement = Mathf.Lerp(AxisY(_transform.position), AxisY(CameraTargetPosition), VerticalFollowSmoothness * Time.deltaTime);
+            var highDeltaMovement = Mathf.Lerp(AxisZ(_transform.position), AxisZ(CameraTargetPosition), HighFollowSmoothness * Time.deltaTime);
+
+            horizontalDeltaMovement -= AxisX(_transform.position);
+            verticalDeltaMovement -= AxisY(_transform.position);
+            highDeltaMovement -= AxisZ(_transform.position);
+
+            var deltaPosition = Vector3D(horizontalDeltaMovement, verticalDeltaMovement, highDeltaMovement);
+            PrevVelocity = deltaPosition.magnitude;
+
+            foreach (IDeltaPositionChanger positionChanger in deltaPositionChangers)
+                deltaPosition = positionChanger.AdjustDelta(deltaPosition);
+
+            Vector3 newPosition = _transform.position + deltaPosition;
+            foreach (IPositionChanged positionChanger in positionChangers)
+                newPosition = positionChanger.HandlePositionChange(newPosition);
+
+            _transform.position = newPosition;
+
+            foreach(IPostMove postMoveAction in postMoveAction)
+                postMoveAction.HandleStopMove(newPosition);
         }
         void SetScreenSize(float newSize)
         {
@@ -240,10 +252,8 @@ namespace HairyEngine.HairyCamera
         }
         private void InitExtensionDelegates()
         {
-            onPreMoveAction = null;
-            onPostMoveAction = null;
-            SortCameraComponents<IPreMove>().ForEach(a => onPreMoveAction += a.HandleStartMove);
-            SortCameraComponents<IPostMove>().ForEach(a => onPostMoveAction += a.HandleStopMove);
+            preMoveAction = SortCameraComponents<IPreMove>();
+            postMoveAction = SortCameraComponents<IPostMove>();
             deltaPositionChangers = SortCameraComponents<IDeltaPositionChanger>();
             positionChangers = SortCameraComponents<IPositionChanged>();
             deltaViewSizeChangers = SortCameraComponents<IViewSizeDeltaChange>();
@@ -282,22 +292,32 @@ namespace HairyEngine.HairyCamera
                 case Isometric.None:
                     IsometricVector3 = (vector) => vector;
                     break;
-
                 case Isometric.Isometric:
-                    float cameraAngleX = _transform.eulerAngles.x * Mathf.Deg2Rad;
-                    float cameraAngleY = _transform.eulerAngles.y * Mathf.Deg2Rad;
-                    float cameraAngleZ = _transform.eulerAngles.z * Mathf.Deg2Rad;
-                    float tgX = 1f / Mathf.Tan(cameraAngleX);
-                    float tgY = 1f / Mathf.Tan(cameraAngleY);
-                    float tgZ = 1f / Mathf.Tan(cameraAngleY) * 2f;
                     switch (axis)
                     {
                         case MovementAxis.XZ:
-                            IsometricVector3 = (vector) => new Vector3(vector.x - _transform.position.y * tgY + 3f, vector.y, vector.z - _transform.position.y * tgX + 8f);
+                            IsometricVector3 = (vector) =>
+                            {
+                                float cameraAngleX = _transform.eulerAngles.x * Mathf.Deg2Rad;
+                                float cameraAngleY = _transform.eulerAngles.y * Mathf.Deg2Rad;
+                                float cameraAngleZ = _transform.eulerAngles.z * Mathf.Deg2Rad;
+                                float tanX = 1f / Mathf.Sin(cameraAngleX);
+                                float tanY = Mathf.Tan(cameraAngleY);
+                                float cosY = Mathf.Cos(cameraAngleY);
+                                Vector3 offset = GameCamera.cameraToWorldMatrix * (new Vector3(0, 0, (-tanX - tanY) * cosY) * hight);
+                                return new Vector3(vector.x - offset.x, vector.y, vector.z - offset.z);
+                            };
                             break;
                     }
                     break;
             }
+        }
+        float Ctan(float angel)
+        {
+            float tan = Mathf.Tan(angel);
+            if (tan == 0)
+                return 0;
+            return 1 / tan;
         }
     }
 }
