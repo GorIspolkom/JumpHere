@@ -5,34 +5,28 @@ namespace Assets.Scripts.Level
 {
     public class Track 
     {
-        public Node lastNode { get; private set; }
-        private List<Node> _nodes;
-        private int _nodeNums;
+        public Transform startTrack { get; private set; }
+        public Transform endTrack { get; private set; }
+        public Transform _track;
+        private float _size;
 
-        public Track(Vector3 startPos, float weight, Vector3 direction)
+        public Track(Vector3 spawnPosition, GameObject track, float jumpDistance, float size, Vector3 direction)
         {
-            _nodes = new List<Node>();
-            _nodeNums = Random.Range(2, 8);
-            Debug.Log("Nums of block in track " + _nodeNums);
-            for (int i = 0; i < _nodeNums; i++)
-            {
-                _nodes.Add(new Node(LevelBuilder.GetLevelBuilder().ChooseBlockType(), weight, startPos));
-                startPos = startPos + direction;
-            }
-            lastNode = _nodes[_nodes.Count - 1];
-            SetNodesStatus();
+            
+            _size = size;
+            _track = Object.Instantiate(track, spawnPosition, Quaternion.identity).transform;
+            _track.rotation = Quaternion.Euler(direction.x, direction.y, direction.z);
+            endTrack = _track.transform.GetChild(0);
+            startTrack = _track.transform.GetChild(1);
+            _track.position -= startTrack.localPosition;
         }
-        public void DeleteTrack()
+        public Track GetNextTrack(GameObject trackPanel, float jumpDistance, float size, Vector3 direction)
         {
-            foreach (Node node in _nodes)
-                node.DestroyNode();
+            Track track = new Track(endTrack.position, trackPanel, jumpDistance, size, direction);
+            track._track.position -= startTrack.localPosition;
+            Debug.Log("Pos " + startTrack.localPosition);
+            return track;
         }
-        private void SetNodesStatus() 
-        {
-            //
-            _nodes[0].panel.AddComponent<BoxCollider>().isTrigger = true;
-            _nodes[0].panel.GetComponent<BoxCollider>().size = new Vector3(7f, 7f, 7f);
-            _nodes[0].panel.AddComponent<StartTrigger>();
-        }
+        public void DeleteTrack() => Object.Destroy(_track.gameObject);
     }
 }

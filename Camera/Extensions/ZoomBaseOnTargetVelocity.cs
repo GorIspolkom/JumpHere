@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace HairyEngine.HairyCamera
 {
-    class ZoomBaseOnTargetVelocity : BaseCameraScript, IViewSizeDeltaChange
+    class ZoomBaseOnTargetVelocity : BaseCameraScript, IViewSizeChanged
     {
         public float CamVelocityForZoomOut = 5f;
         public float CamVelocityForZoomIn = 2f;
@@ -21,16 +21,21 @@ namespace HairyEngine.HairyCamera
         public float MaxZoomOutAmount = 2f;
 
         float _zoomVelocity;
+        float _initialCamSize;
         float _previousCamSize;
 
         float _currentVelocity;
 
         public int PriorityOrder => 1;
+        private void Awake()
+        {
+            _initialCamSize = BaseCameraController.ScreenSizeInWorldCoordinates.y;
+        }
 
-        public float AdjustSize(float deltaSize)
+        public float HandleSizeChanged(float nextSize)
         {
             if (!enabled)
-                return deltaSize;
+                return nextSize;
 
             // If the camera is bounded, reset the easing
             if (_previousCamSize == BaseCameraController.ScreenSizeInWorldCoordinates.y)
@@ -39,12 +44,12 @@ namespace HairyEngine.HairyCamera
             var currentSize = BaseCameraController.ScreenSizeInWorldCoordinates.y;
             var targetSize = currentSize;
 
-            _currentVelocity = BaseCameraController.Targets.velocity.magnitude * 100;
+            _currentVelocity = BaseCameraController.Targets.velocity.magnitude / Time.deltaTime;
             // Zoom out
             if (_currentVelocity > CamVelocityForZoomIn)
             {
                 var speedPercentage = (_currentVelocity - CamVelocityForZoomIn) / (CamVelocityForZoomOut - CamVelocityForZoomIn);
-                var newSize = MaxZoomOutAmount * Mathf.Clamp01(speedPercentage);
+                var newSize = MaxZoomOutAmount * Mathf.Clamp01(speedPercentage) * 2f;
 
                 if (newSize > currentSize)
                     targetSize = newSize;
@@ -65,13 +70,15 @@ namespace HairyEngine.HairyCamera
                 targetSize = Mathf.SmoothDamp(currentSize, targetSize, ref _zoomVelocity, smoothness, Mathf.Infinity, Time.deltaTime);
                 //targetSize = Mathf.Lerp(currentSize, targetSize, smoothness * Time.deltaTime);
             }
+            else
+                targetSize = currentSize;
             var zoomAmount = targetSize - currentSize;
 
             // Detect if the camera size is bounded
             _previousCamSize = BaseCameraController.ScreenSizeInWorldCoordinates.y;
 
             // Return the zoom delta - delta already factored in by SmoothDamp
-            return deltaSize + zoomAmount;
+            return nextSize + zoomAmount;
         }
     }
 }

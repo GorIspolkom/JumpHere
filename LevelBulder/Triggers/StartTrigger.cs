@@ -11,9 +11,9 @@ namespace Assets.Scripts.Level
             if (other.tag == "Player")
             {
                 StartCoroutine(LevelBuilder.GetLevelBuilder().NewTrack());
-                Debug.Log("Data point " + Data._points);
+                Debug.Log("Trigger worked");
                 UIManager.GetUIManager().SetText();
-                gameObject.GetComponent<StartTrigger>().enabled = false;
+                gameObject.GetComponent<BoxCollider>().enabled = false;
             }
         }
     }

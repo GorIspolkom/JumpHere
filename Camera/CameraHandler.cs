@@ -106,6 +106,8 @@ namespace HairyEngine.HairyCamera
 
             CalculateScreenSize();
             targetController.Update();
+            CameraTargetSize = targetController.minSizes.y > targetController.minSizes.x ? targetController.minSizes.y : targetController.minSizes.x / GameCamera.aspect;
+            SetScreenSize(CameraTargetSize);
             if (isCenterOnTargetOnStart)
             {
                 _transform.position = Vector3D(targetController.currentCenter.x, targetController.currentCenter.y, hight);
@@ -122,8 +124,7 @@ namespace HairyEngine.HairyCamera
         private void Zoom()
         {
             // Cycle through the size delta changers
-            CameraTargetSize = targetController.minSizes.y > targetController.minSizes.x ? targetController.minSizes.y : targetController.minSizes.x / GameCamera.aspect;
-            var deltaSize = Mathf.Lerp(ScreenSizeInWorldCoordinates.y, CameraTargetSize, zoomFollowSmoothness * Time.deltaTime) - ScreenSizeInWorldCoordinates.y;
+            var deltaSize = 0f;
             foreach (IViewSizeDeltaChange viewSizeDeltaChange in deltaViewSizeChangers)
                 deltaSize = viewSizeDeltaChange.AdjustSize(deltaSize);
 

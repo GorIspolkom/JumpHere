@@ -62,13 +62,12 @@ namespace HairyEngine.HairyCamera
         }
         private void Generate()
         {
-            float hInflunce = UnityEngine.Random.Range(-1, 1);
-            float vInflunce = UnityEngine.Random.Range(-1, 1);
+            float hInflunce = UnityEngine.Random.Range(-1f, 1f);
+            float vInflunce = UnityEngine.Random.Range(-1f, 1f);
             generatedPosition = new Vector3(hInflunce * MaxHorizontalInfluence, vInflunce * MaxVerticalInfluence);
             startInflunce = currentInflunce;
             currentTime = 0f;
             time = (currentInflunce - generatedPosition).magnitude / SmoothVelocity;
-            Debug.Log(time);
         }
     }
 }
