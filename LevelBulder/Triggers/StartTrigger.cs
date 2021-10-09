@@ -10,6 +10,7 @@ namespace Assets.Scripts.Level
         {
             if (other.tag == "Player")
             {
+                Debug.Log("Guddr loh");
                 StartCoroutine(LevelBuilder.GetLevelBuilder().NewTrack());
                 Debug.Log("Trigger worked");
                 gameObject.GetComponent<BoxCollider>().enabled = false;
