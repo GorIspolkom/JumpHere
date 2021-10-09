@@ -9,6 +9,7 @@ namespace HairyEngine.HairyCamera
 {
     public class CameraHandler : MonoBehaviour
     {
+        public float hight = 15f;
         public bool FollowHorizontal = true;
         public float HorizontalFollowSmoothness = 0.15f;
 
@@ -59,7 +60,6 @@ namespace HairyEngine.HairyCamera
         public float OffsetX;
         [Range(-1f, 1f)]
         public float OffsetY;
-        public float hight;
 
         [SerializeField] TargetController targetController;
         [SerializeField] MovementAxis axis;
@@ -80,8 +80,9 @@ namespace HairyEngine.HairyCamera
         Func<float, float, float, Vector3> Vector3D;
         Func<Vector3, Vector3> IsometricVector3;
 
-        private List<IPreMove> preMoveAction;
-        private List<IPostMove> postMoveAction;
+        private List<IPreMove> preMoveActions;
+        private List<IPostMove> postMoveActions;
+        private List<IPostZoom> postZoomActions;
         private List<IDeltaPositionChanger> deltaPositionChangers;
         private List<IPositionChanged> positionChangers;
         private List<IViewSizeDeltaChange> deltaViewSizeChangers;
@@ -92,6 +93,7 @@ namespace HairyEngine.HairyCamera
             _transform = transform;
             _prevCameraPos = _transform.position;
             _instance = this;
+            _cameraScripts = new List<BaseCameraScript>();
             _gameCamera = GetComponent<Camera>();
             if (_gameCamera == null)
                 Debug.LogError("CameraHandler should be on Camera but it isn't like that");
@@ -99,7 +101,6 @@ namespace HairyEngine.HairyCamera
         }
         private void Start()
         {
-            _cameraScripts = new List<BaseCameraScript>();
             foreach (BaseCameraScript component in _transform.GetComponents<BaseCameraScript>())
                 _cameraScripts.Add(component);
             InitExtensionDelegates();
@@ -139,13 +140,19 @@ namespace HairyEngine.HairyCamera
             // Apply the new size
             if (newSize != ScreenSizeInWorldCoordinates.y)
                 SetScreenSize(newSize);
+
+            Debug.Log(postZoomActions.Count);
+            foreach (IPostZoom postZoomAction in postZoomActions)
+            {
+                postZoomAction.HandleZoomChange(ScreenSizeInWorldCoordinates);
+            }
         }
         private void Move()
         {
             _prevCameraPos = _transform.position;
             Vector2 delta = targetController.currentCenter - _transform.position;
 
-            foreach (IPreMove preMoveAction in preMoveAction)
+            foreach (IPreMove preMoveAction in preMoveActions)
                 preMoveAction.HandleStartMove(targetController.currentCenter);
 
             if (exclusiveTargetPosition.HasValue)
@@ -192,7 +199,7 @@ namespace HairyEngine.HairyCamera
 
             _transform.position = newPosition;
 
-            foreach(IPostMove postMoveAction in postMoveAction)
+            foreach(IPostMove postMoveAction in postMoveActions)
                 postMoveAction.HandleStopMove(newPosition);
         }
         void SetScreenSize(float newSize)
@@ -253,8 +260,9 @@ namespace HairyEngine.HairyCamera
         }
         private void InitExtensionDelegates()
         {
-            preMoveAction = SortCameraComponents<IPreMove>();
-            postMoveAction = SortCameraComponents<IPostMove>();
+            preMoveActions = SortCameraComponents<IPreMove>();
+            postMoveActions = SortCameraComponents<IPostMove>();
+            postZoomActions = SortCameraComponents<IPostZoom>();
             deltaPositionChangers = SortCameraComponents<IDeltaPositionChanger>();
             positionChangers = SortCameraComponents<IPositionChanged>();
             deltaViewSizeChangers = SortCameraComponents<IViewSizeDeltaChange>();
@@ -312,13 +320,6 @@ namespace HairyEngine.HairyCamera
                     }
                     break;
             }
-        }
-        float Ctan(float angel)
-        {
-            float tan = Mathf.Tan(angel);
-            if (tan == 0)
-                return 0;
-            return 1 / tan;
         }
     }
 }

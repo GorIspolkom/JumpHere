@@ -12,7 +12,6 @@ namespace Assets.Scripts.Level
             {
                 StartCoroutine(LevelBuilder.GetLevelBuilder().NewTrack());
                 Debug.Log("Trigger worked");
-                UIManager.GetUIManager().SetText();
                 gameObject.GetComponent<BoxCollider>().enabled = false;
             }
         }

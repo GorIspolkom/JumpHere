@@ -2,17 +2,27 @@ using UnityEngine;
 
 public static class Data
 {
-    [SerializeField]
-    public static double _points;
-    [SerializeField]
-    public static double _path;
-    [SerializeField]
-    public static float _timer;
+    public static double points;
+    public static double path;
+    public static float timer;
    
+    public static void Update(float deltaTime)
+    {
+        timer += deltaTime;
+    }
+    public static void AddPath(double deltaPath)
+    {
+        path += deltaPath;
+        points += PathToPoint(deltaPath);
+    }
+    private static double PathToPoint(double path)
+    {
+        return path;
+    }
     public static void InitData(double points, double path, float timer)
     {
-        _points = points;
-        _path = path;
-        _timer = timer;
+        Data.points = points;
+        Data.path = path;
+        Data.timer = timer;
     }
 }

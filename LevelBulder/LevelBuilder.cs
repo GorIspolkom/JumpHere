@@ -10,7 +10,7 @@ namespace Assets.Scripts.Level
         private Track[] _tracks = new Track[10];
         [SerializeField]
         // ass overflow
-        private float _panelSize { get { return _panelSize; } set { _panelSize = (float)Data._path / 3; } }
+        private float _panelSize { get { return _panelSize; } set { _panelSize = (float)Data.path / 3; } }
         [SerializeField]
         private enum Direction { XDirection, ZDirection };
         [SerializeField]
@@ -34,7 +34,7 @@ namespace Assets.Scripts.Level
         private static LevelBuilder _levelBuilder;
         public static LevelBuilder GetLevelBuilder() =>
             _levelBuilder == null ? FindObjectOfType<LevelBuilder>() : _levelBuilder;
-        private GameObject ChooseTrack() => _tracksPanels[Random.Range(1, 6)];
+        private GameObject ChooseTrack() => _tracksPanels[Random.Range(1, _tracksPanels.Length)];
         private Vector3 ChangeDirection()
         {
             Vector3 direction;

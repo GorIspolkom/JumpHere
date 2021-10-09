@@ -10,5 +10,5 @@ public class UIManager : MonoBehaviour
     private Text _text;
     public static UIManager GetUIManager() =>
             _UIManager == null ? FindObjectOfType<UIManager>() : _UIManager;
-    public void SetText() => _text.text = Data._points.ToString();
+    public void SetText() => _text.text = Data.points.ToString();
 }

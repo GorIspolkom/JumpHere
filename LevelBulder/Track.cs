@@ -21,9 +21,10 @@ namespace Assets.Scripts.Level
         public Track GetNextTrack(GameObject trackPanel, float jumpDistance, float size, Vector3 direction)
         {
             Track track = new Track(endTrack.position, trackPanel, jumpDistance, size, direction);
-            // track._track.position -= startTrack.localPosition;
-            if(direction.y > 0) { track._track.position += new Vector3(2, 0, jumpDistance); }
-            else { track._track.position += new Vector3(-3, 0, jumpDistance  + 5); }
+            if(direction.y > 0) 
+                track._track.position += new Vector3(2, 0, jumpDistance);
+            else 
+                track._track.position += new Vector3(-3, 0, jumpDistance  + 5); 
             track._track.rotation = Quaternion.Euler(direction);
             Debug.Log("Pos " + startTrack.localPosition);
             return track;

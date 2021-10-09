@@ -7,5 +7,5 @@ public class PointsCounter
 {
     [SerializeField]
     private Text _text;
-    public void SetText() => _text.text = "Points " + Data._points;
+    public void SetText() => _text.text = "Points " + Data.points;
 }

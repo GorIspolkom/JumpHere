@@ -27,6 +27,10 @@ namespace HairyEngine.HairyCamera
     {
         void HandleStopMove(Vector3 position);
     }
+    public interface IPostZoom : ICameraComponent
+    {
+        void HandleZoomChange(Vector2 newSize);
+    }
 
     public interface IViewSizeDeltaChange : ICameraComponent
     {
