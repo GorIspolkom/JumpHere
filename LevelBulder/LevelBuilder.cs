@@ -58,7 +58,7 @@ namespace Assets.Scripts.Level
         {
             for(int i = 0; i < 9; i++)
                 _tracks[i] = _tracks[i + 1];
-            _tracks[9].GetNextTrack(ChooseTrack(), _distanceJump, 7, ChangeDirection());
+            _tracks[9] = _tracks[8].GetNextTrack(ChooseTrack(), _distanceJump, 7, ChangeDirection());
 
             yield return null;
         }
