@@ -56,9 +56,7 @@ namespace HairyEngine.HairyCamera
             }
         }
 
-        [Range(-1f, 1f)]
         public float OffsetX;
-        [Range(-1f, 1f)]
         public float OffsetY;
 
         [SerializeField] TargetController targetController;

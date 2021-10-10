@@ -20,20 +20,12 @@ namespace Assets.Scripts.Players
         public Animation GetAnimation() => _anim;
         public void Request() => _state.Action();
         public void SetState(State state) => _state = state;
-        public void Jump() => _rb.AddForce(new Vector3(0, 1, 0) * _data.GetJumpPower(), ForceMode.Impulse);
-        public void Move() => _rb.AddForce(new Vector3(0, 0, 1) * _data.GetVelocity(), ForceMode.Acceleration);
 
         private void Awake() =>
             _rb = _player.GetComponent<Rigidbody>();
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.W)) { }
-            else if (Input.GetKeyDown(KeyCode.Space) && !_data.GetInJump()) { Jump(); _data.SetInJump(true); }
-            else { Move(); }
-        }
-        private void OnTriggerEnter(Collider other)
-        {
-            _data.SetInJump(false);
+            //_rb.velocity = new Vector3(0, 0, 1);
         }
     }
 }
