@@ -1,4 +1,6 @@
-﻿using ECM.Controllers;
+﻿using Assets.Scripts.Level;
+using ECM.Controllers;
+using HairyEngine.HairyCamera;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +13,8 @@ namespace Assets.Scripts.Players
     public class CharacterController : BaseCharacterController
     {
         private static CharacterController _instance;
-        public static CharacterController Instance => _instance;
+        public static CharacterController Instance => _instance == null ? FindObjectOfType<CharacterController>() : _instance;
+        public Transform playerTransform { get; private set; }
         private Vector3 _direction;
         private Animator _anim;
 
@@ -21,12 +24,12 @@ namespace Assets.Scripts.Players
             _instance = this;
             _direction = Vector3.forward;
             _anim = GetComponent<Animator>();
+            playerTransform = transform;
         }
         public override void Update()
         {
             base.Update();
-            Vector3 velocity = movement.velocity;
-            velocity.y = 0;
+            Vector3 velocity = movement.velocity.NablaMultiply(TrackBuilder.Instance.CurrentDirect);
             Data.AddPath(velocity.magnitude * Time.deltaTime);
         }
         protected override void HandleInput()
@@ -42,11 +45,18 @@ namespace Assets.Scripts.Players
                 _anim.SetBool("Run", true);
             }
             jump = Input.GetButton("Jump");
-            Debug.Log("Movement");
+            if (TrackBuilder.Instance.IsTurnPosible && jump)
+            {
+                Debug.Log("Jump");
+                TrackBuilder.Instance.TurnAxis();
+                _direction = TrackBuilder.Instance.CurrentDirect;
+            }
         }
 
-        public void ChangeDirection() =>
-            _direction = (_direction != Vector3.forward) ? Vector3.forward : Vector3.right;
-            
+        public void SpeedChange(float speedChange)
+        {
+            speed -= speedChange;
+            //movement.velocity -= Vector3.one * speed;
+        }
     }
 }

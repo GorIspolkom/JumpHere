@@ -10,7 +10,7 @@ namespace Assets.Scripts.Level
         {
             if (other.tag == "Player")
             {
-                Players.CharacterController.Instance.ChangeDirection();
+                //Players.CharacterController.Instance.ChangeDirection();
                 Debug.Log("Finish trigger worked");
                 gameObject.GetComponent<BoxCollider>().enabled = false;
             }

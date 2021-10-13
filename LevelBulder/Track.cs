@@ -13,7 +13,7 @@ namespace Assets.Scripts.Level
         public Track(Vector3 spawnPosition, GameObject track, float jumpDistance, float size, Vector3 direction)
         {
             _size = size;
-            _track = Object.Instantiate(track, spawnPosition, Quaternion.identity).transform;
+            _track = GameObject.Instantiate(track, spawnPosition, Quaternion.identity).transform;
             endTrack = _track.transform.GetChild(0);
             startTrack = _track.transform.GetChild(1);
             //_track.position -= startTrack.localPosition;
@@ -24,7 +24,7 @@ namespace Assets.Scripts.Level
             if(direction.y > 0) 
                track._track.position += new Vector3(jumpDistance + size, 0, 0);
             else 
-               track._track.position += new Vector3(0, 0, jumpDistance  + size); 
+               track._track.position += new Vector3(0, 0, jumpDistance + size); 
             track._track.rotation = Quaternion.Euler(direction);
             Debug.Log("Pos " + startTrack.localPosition);
             return track;

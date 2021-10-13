@@ -9,9 +9,6 @@ namespace Assets.Scripts.Level
         [SerializeField]
         private Track[] _tracks = new Track[10];
         [SerializeField]
-        // ass overflow
-        private float _panelSize { get { return _panelSize; } set { _panelSize = (float)Data.path / 3; } }
-        [SerializeField]
         private enum Direction { XDirection, ZDirection };
         [SerializeField]
         private Direction _currentDirection;
@@ -25,7 +22,6 @@ namespace Assets.Scripts.Level
 
         private void Awake()
         {
-            //
             _levelBuilder = this;
             _tracks[0] = new Track(_startPosition, _tracksPanels[0], _distanceJump, 7, new Vector3(0,0,0));
             for (int i = 0; i < 9; i++)

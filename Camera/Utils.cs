@@ -39,5 +39,12 @@ namespace HairyEngine.HairyCamera
         {
             return Mathf.Clamp((value - from1) / (to1 - from1) * (to2 - from2) + from2, from2, to2);
         }
+        public static Vector3 NablaMultiply(this Vector3 v1, Vector3 v2)
+        {
+            v1.x *= v2.x;
+            v1.y *= v2.y;
+            v1.z *= v2.z;
+            return v1;
+        }
     }
 }

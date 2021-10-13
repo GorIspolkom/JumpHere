@@ -139,7 +139,6 @@ namespace HairyEngine.HairyCamera
             if (newSize != ScreenSizeInWorldCoordinates.y)
                 SetScreenSize(newSize);
 
-            Debug.Log(postZoomActions.Count);
             foreach (IPostZoom postZoomAction in postZoomActions)
             {
                 postZoomAction.HandleZoomChange(ScreenSizeInWorldCoordinates);
@@ -236,7 +235,6 @@ namespace HairyEngine.HairyCamera
             foreach (object cameraScript in _cameraScripts)
                 if (cameraScript is T)
                     components.Add((T)cameraScript);
-            Debug.Log(_cameraScripts.Select(a => a is T) as List<BaseCameraScript>);
             return components.OrderBy(a => a.PriorityOrder).ToList();
         }
 
