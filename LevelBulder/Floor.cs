@@ -9,10 +9,11 @@ namespace Assets.Scripts.Level
 {
     class Floor
     {
-        public const float size = 4.2f;
+        public const float size = 4.1f;
         public Vector3 position;
+        public Vector3 centerPosition => center.position;
         private Transform center;
-        private Transform floorObject;
+        public Transform floorObject;
 
         public Floor(Vector3 spawnPosition, GameObject floorPrefab)
         {
@@ -28,12 +29,12 @@ namespace Assets.Scripts.Level
                 center = floorObject;
             position = center.position - Vector3.one * size;
         }
-        public Floor GetNextTile(GameObject trackPanel, Vector3 direction, float jumpDistance = 0)
+        public Floor GetNextTile(Transform trackPanel, Vector3 direction, float jumpDistance = 0)
         {
-            Transform floor = GameObject.Instantiate(trackPanel, center.position + direction * (2 * size + jumpDistance), Quaternion.identity).transform;
-            Transform centerNext = floor.Find("Center");
-            floor.position -= centerNext == null ? Vector3.zero : centerNext.localPosition;
-            return new Floor(floor, centerNext);
+            trackPanel.position = center.position + direction * (2 * size + jumpDistance);
+            Transform centerNext = trackPanel.Find("Center");
+            trackPanel.position -= centerNext == null ? Vector3.zero : centerNext.localPosition;
+            return new Floor(trackPanel, trackPanel);
         }
         public void DeleteTrack() => GameObject.Destroy(floorObject.gameObject);
     }

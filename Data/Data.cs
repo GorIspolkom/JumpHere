@@ -3,6 +3,7 @@ using UnityEngine;
 public static class Data
 {
     public static double points;
+    public static double velocity;
     public static double path;
     public static float timer;
    

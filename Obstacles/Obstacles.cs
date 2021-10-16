@@ -7,6 +7,6 @@ public class Obstacles : MonoBehaviour
     public virtual void OnCollisionEnter(Collision collision) 
     {
         Debug.Log("Collision with obstacles detect");
-        Destroy(gameObject);
+        //Destroy(gameObject);
     }
 }
