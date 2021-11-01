@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using Assets.Scripts.Data;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,6 +12,7 @@ public class ScoreShow : MonoBehaviour
     }
     void Update()
     {
-        _text.text = preScoreString + Data.points.ToString("0");
+        
+        _text.text = preScoreString + SessionData.points.ToString("0");
     }
 }

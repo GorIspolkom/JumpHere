@@ -11,9 +11,9 @@ namespace HairyEngine.HairyCamera
     public class TargetController
     {
         [HideInInspector]
-        public Vector3 prevCenter;
+        public Vector3 prevCenter { get; private set; }
         [HideInInspector]
-        public Vector3 currentCenter;
+        public Vector3 currentCenter { get; private set; }
         [HideInInspector]
         public Vector2 minSizes;
         public Vector3 velocity => currentCenter - prevCenter;
@@ -88,6 +88,8 @@ namespace HairyEngine.HairyCamera
             Update();
             prevCenter = currentCenter;
         }
+        public void SetNewCurrentPosition(Vector3 newCurrentCenterPosition) =>
+            currentCenter = newCurrentCenterPosition;
         public void RemoveTarget(Transform target)
         {
             foreach(CameraTarget2D cameraTarget in _targets)

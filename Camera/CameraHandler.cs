@@ -27,6 +27,7 @@ namespace HairyEngine.HairyCamera
         public TargetController Targets => targetController;
         public Transform CameraTransform => _transform;
         public Vector3 WorldToLocalPlanty(Vector3 vector) => IsometricVector3(Vector3D(vector.x, vector.y, vector.z));
+        public Vector3 Vector3ToAxis(Vector3 vector) => Vector3D(vector.x, vector.y, vector.z);
         public float PrevVelocity { get; private set; }
         public Vector3 CameraTargetPosition { get; private set; }
         public Vector3 CameraPosition { get => _transform.position; }
@@ -116,8 +117,7 @@ namespace HairyEngine.HairyCamera
         private void Update()
         {
             targetController.Update();
-            //if (targetController.IsMovement || IsOutTarget)
-                Move();
+            Move();
             Zoom();
         }
         private void Zoom()
@@ -147,10 +147,11 @@ namespace HairyEngine.HairyCamera
         private void Move()
         {
             _prevCameraPos = _transform.position;
-            Vector2 delta = targetController.currentCenter - _transform.position;
 
             foreach (IPreMove preMoveAction in preMoveActions)
                 preMoveAction.HandleStartMove(targetController.currentCenter);
+
+            Vector2 delta = targetController.currentCenter - _transform.position;
 
             if (exclusiveTargetPosition.HasValue)
             {

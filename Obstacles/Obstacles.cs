@@ -2,11 +2,50 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Obstacles : MonoBehaviour
+namespace JumpHere.Obstacles
 {
-    public virtual void OnCollisionEnter(Collision collision) 
+    /// <summary>
+     ////Препятствия:
+     ////1. Статические
+     ////  а.Взаимодействуют по физике и поворачивают игрока в сторону в зависимости от его смещения от центра или уже имеющегося поворота
+     ////  б.После столкновения коллайдер отключается
+     ////  в.На данный момент реализованы:
+     ////    -Коробки
+     ////    -Шлагбаум
+     ////    -Барьер - падает по физике(переворачивается, если врезаться по центру)
+     ////2. Динамические
+     ////  а.Появляется заместо обычной платформы
+     ////  б. Реализована только движущаяся панель
+     ////3. Препятствия в обрыве
+     ////  а.Пушка - стреляет снарядами, которые сталкивают игрока
+     ////  б.Движущаяся стена - движется вверх-вниз в обрыве(высота задается). Также может быть настроена и двигаться в другом направлении
+
+     ////Генерация:
+     ////1. Все шансы настраиваются в скрипте, который лежит в камере
+     ////2. Генерация динамических препятствий
+     ////3. Генерация препятствий в обрыве
+
+
+     ////Игрок:
+     ////1. Добавлен функционал для поворота игроком в ручную или автоматически
+     ////2. Игрок стремится к центру дорожки(скорость задается, 0 - если не нужно)
+     ////3. Игрок сменяет траекторию движения при столкновении со стаческими препятствиями
+    /// </summary>
+    public class Obstacles : MonoBehaviour
     {
-        Debug.Log("Collision with obstacles detect");
-        //Destroy(gameObject);
+        public virtual void OnCollisionEnter(Collision collision)
+        {
+            Debug.Log("Collision with obstacles detect");
+            StartCoroutine(DestroyDelay());
+        }
+        IEnumerator DestroyDelay()
+        {
+            Collider[] colliders = GetComponents<Collider>();
+            if(colliders.Length > 0)
+                foreach(Collider collider in colliders)
+                    collider.enabled = false;
+            yield return new WaitForSeconds(1f);
+            Destroy(gameObject);
+        }
     }
 }

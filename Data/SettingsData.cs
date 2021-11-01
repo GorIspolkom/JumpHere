@@ -2,17 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SettingsData : MonoBehaviour
+public class SettingsData
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    public static readonly Vector3 StartDirection = new Vector3(0, 1, 1);
+    public static readonly float StartVelocity = 10;
 }
